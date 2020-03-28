@@ -129,42 +129,7 @@ function createEvidence (event) {
                 });
             });
         });
-
-        // captureScreen(function (response) {
-        //     console.log('captureScreen response', response);
-        //     evidence.screenshot_encoded = response;
-        // });
-
-        // upload_to_s3(evidence).then(function (signed_url) {
-        //     finalSignedURL = signed_url;
-        //     return download_from_s3(signed_url);
-        // });
     });
-    
-    // log_data
-    // let p2 = chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-    //     // listener in background.js
-    //     chrome.extension.sendMessage({tabId:tabs[0].id, action: "getConsoleLog"}, function (response) {
-    //         console.log('getConsoleLog response', response);
-    //         evidence.log_data = response;
-    //         return true;
-    //     });
-    // });
-
-    // // screenshot
-    // let p3 = captureScreen(function (response) {
-    //     console.log('captureScreen response', response);
-    //     evidence.screenshot_encoded = response;
-    //     return true;
-    // });
-
-    // Promise.all([p1, p2, p3]).then(values => {
-    //     console.log('All promises resolved!', evidence);
-    //     upload_to_s3(evidence).then(function (signed_url) {
-    //         finalSignedURL = signed_url;
-    //         return download_from_s3(signed_url);
-    //     });
-    // });
 }
 
 
