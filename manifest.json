@@ -4,7 +4,6 @@
 	"description": "",
 	"version": "1.0",
 	"author": "Break Pointers",
-	"devtools_page": "devtools.html",
 	"web_accessible_resources": [
 		"/images/checkMark.png"
 	],
