@@ -36,3 +36,13 @@ chrome.runtime.onMessage.addListener(
 		return true;
 		}
 	);
+
+
+chrome.runtime.onMessage.addListener(
+	function (request, sender, sendResponse) {
+    chrome.debugger.attach({tabId:request.tabId}, version, onAttach.bind(null, request.tabId));
+    return setTimeout(() => {
+        console.log('herrreee', logData);
+        sendResponse({logData:logData});
+    }, 1000);
+});

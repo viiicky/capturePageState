@@ -220,55 +220,72 @@ var runPopup = function () {
 		let checkboxScreenshot = document.getElementById('checkboxScreenshot');
 		let checkboxConsoleLog = document.getElementById('checkboxConsoleLog');
 		let checkboxBrowserData = document.getElementById('checkboxBrowserData');
-		let checkboxHARLog = document.getElementById('checkboxHARLog');
+		// let checkboxHARLog = document.getElementById('checkboxHARLog');
+		let promises = [];
+		let p1, p3;
+		let data = {
+			encodedUrl: '',
+			encodedBrowserData: '',
+			encodedConsoleLog: ''
+		}
 
 
 		if (checkboxBrowserData.checked) {
-			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			p1 = new Promise(resolve =>chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+				data.encodedUrl = btoa(tabs[0].url);
 				chrome.tabs.sendMessage(tabs[0].id, {action: "getBrowserData"}, function(response) {
-				  console.log(response);
+				  console.log('getBrowserData', response);
+				  data.encodedBrowserData = btoa(JSON.stringify(response));
 				});
-			});
+			}));
 		}
-
 
 		if (checkboxScreenshot.checked) {
 			runPopup()
 		}
 
+		console.log(data);
 		if (checkboxConsoleLog.checked) {
 			// get active tab and send message
-			chrome.tabs.query({
+			p3 = new Promise(resolve =>chrome.tabs.query({
 				active: true,
 				lastFocusedWindow: true
 			}, function (tabs) {
 				var tab = tabs[0];
-				let message = { action: "getConsoleLog", tabId: tab.id };
+				let message = { action: "getConsoleLog", tabId: tabs[0].id };
 
-				console.log(JSON.stringify(message))
-				chrome.extension.sendMessage(message, function (a) {
-					// alert(JSON.stringify(a));
+				console.log('getConsoleLog', JSON.stringify(message))
+				chrome.extension.sendMessage(message, function (response) {
+					// alert(JSON.stringify(response));
+					console.log('getConsoleLog response, response', response);
+				  	data.encodedConsoleLog = btoa(JSON.stringify(response));
 				});
 
-			});
+			}));
 		}
 
-		if (checkboxHARLog.checked) {
+		Promise.all([p1, p3]).then(values => { 
+		    console.log('within Promise.all1', values, data);
+		}).then(values => { 
+		    console.log('within Promise.all2', values, data);
+		});
 
-			// check if devtools is open
-			chrome.extension.sendMessage({ action: "getDevToolsStatus" }, function (response) {
-				if (!response.data) {
-					alert("DevTools needs to be open to get HAR logs")
-				} else {
+		// if (checkboxHARLog.checked) {
 
-					// sends message to devtools(through background.js)
-					let message = { action: "downloadHARlog" };
-					chrome.extension.sendMessage(message, function (a) {
-						// alert(JSON.stringify(a));
-					});
-				}
-			});
-		}
+		// 	// check if devtools is open
+		// 	chrome.extension.sendMessage({ action: "getDevToolsStatus" }, function (response) {
+		// 		if (!response.data) {
+		// 			alert("DevTools needs to be open to get HAR logs")
+		// 		} else {
+
+		// 			// sends message to devtools(through background.js)
+		// 			let message = { action: "downloadHARlog" };
+		// 			chrome.extension.sendMessage(message, function (a) {
+		// 				// alert(JSON.stringify(a));
+		// 			});
+		// 		}
+		// 	});
+		// }
 
 	}
 })();

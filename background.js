@@ -30,6 +30,7 @@ var gTabId;
 var logData = [];
 
 function onEvent(debuggeeId, message, params) {
+    console.log('onEvent', onEvent);
     if (gTabId != debuggeeId.tabId)
         return;
 
@@ -45,25 +46,27 @@ function onAttach(tabId) {
     // use Log.enable and go from there
     chrome.debugger.sendCommand({ tabId: tabId }, "Log.enable");
     chrome.debugger.onEvent.addListener(onEvent);
+    console.log('before setTimeout', logData);
 
-    setTimeout(() => {
-        let harBLOB = new Blob([JSON.stringify(logData)]);
+    return setTimeout(() => {
+        console.log('within setTimeout', logData);
 
-        let url = URL.createObjectURL(harBLOB);
+    //     // let harBLOB = new Blob([JSON.stringify(logData)]);
 
-        chrome.downloads.download({
-            url: url
-        });
+    //     // let url = URL.createObjectURL(harBLOB);
 
-        // cleanup after downloading file
-        chrome.debugger.sendCommand({ tabId: tabId }, "Log.disable");
-        chrome.debugger.detach({ tabId: tabId });
-        gTabId = undefined;
-        logData = [];
-        
+    //     // chrome.downloads.download({
+    //     //     url: url
+    //     // });
+
+    //     // // cleanup after downloading file
+    //     // chrome.debugger.sendCommand({ tabId: tabId }, "Log.disable");
+    //     // setTimeout(() => {chrome.debugger.detach({ tabId: tabId });}, 500);
+
+        return logData;
     }, 1000);
-    
   }
+
 
 
 // is devtools open
@@ -92,18 +95,9 @@ chrome.runtime.onConnect.addListener(function (port) {
 // messages from popup.js
 // Always return true for async connections for chrome.runtime.onConnect.addListener
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    let info = {}
-    info.request = JSON.stringify(request)
-    info.sender = JSON.stringify(sender)
-    info.sendResponse = JSON.stringify(sendResponse)
-
-    if(request.action === "getDevToolsStatus"){
-        // response needs to be in JSON format
-        sendResponse({data: isDevToolsOpen})
-    } else if (request.action === "getConsoleLog"){
-
-        chrome.debugger.attach({tabId:request.tabId}, version,
-            onAttach.bind(null, request.tabId));
-    }
-    return true;
+    chrome.debugger.attach({tabId:request.tabId}, version, onAttach.bind(null, request.tabId));
+    return setTimeout(() => {
+        console.log('herrreee', logData);
+        sendResponse({logData:logData});
+    }, 1000);
 });
