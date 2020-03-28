@@ -132,9 +132,9 @@ function createEvidence (event) {
     });
 }
 
-function downloadAndLoadEvidence (event) {
-	evidence = download_from_s3(finalSignedURL);
-}
+// function downloadAndLoadEvidence (event) {
+// 	evidence = download_from_s3(finalSignedURL);
+// }
 	
 
 (function () {
@@ -159,5 +159,5 @@ function downloadAndLoadEvidence (event) {
     createEvidenceAction.onclick = createEvidence(event);
 
     var loadEvidenceAction = document.getElementById('loadEvidence');
-    loadEvidenceAction.onclick = downloadAndLoadEvidence(event);
+    // loadEvidenceAction.onclick = downloadAndLoadEvidence(event);
 })();
