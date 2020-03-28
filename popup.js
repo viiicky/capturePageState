@@ -325,6 +325,7 @@ var runPopup = function () {
 	});
 };
 
+var evidence = {};
 
 (function () {
 	var LoadButton = document.getElementById('Load');
@@ -336,7 +337,7 @@ var runPopup = function () {
 			});
 		});
 	}
-	
+
 	var captureButton = document.getElementById('whatToCapture');
 
 	captureButton.onclick = function (event) {
