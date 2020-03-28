@@ -47,7 +47,8 @@ function upload_to_s3 (evidence) {
     function(data) {
           var params = {
             Bucket: bucketName,
-            Key: evidenceFileKey
+            Key: evidenceFileKey,
+            Expires: 86400
           };
           var url = s3.getSignedUrl('getObject', params);
           console.log('The URL is', url);
@@ -138,9 +139,12 @@ function createEvidence (event) {
 	
 
 (function () {
-	var loadEvidence = document.getElementById('loadEvidence');
+    var createEvidenceAction = document.getElementById('createEvidenceAction');
+    createEvidenceAction.addEventListener('click', createEvidence);
 
-	loadEvidence.onclick = function (event) {
+    var loadEvidenceAction = document.getElementById('loadEvidenceAction');
+
+	loadEvidenceAction.onclick = function (event) {
 		var file = document.getElementById("file").files[0];
 		var reader = new FileReader();
 		reader.onload = function(e){
@@ -154,10 +158,4 @@ function createEvidence (event) {
 		}
 		evidence = reader.readAsText(file);
 	}
-
-    var createEvidenceAction = document.getElementById('createEvidence');
-    createEvidenceAction.onclick = createEvidence(event);
-
-    var loadEvidenceAction = document.getElementById('loadEvidence');
-    // loadEvidenceAction.onclick = downloadAndLoadEvidence(event);
 })();
