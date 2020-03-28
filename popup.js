@@ -2,6 +2,87 @@
 // Copyright (c) 2015 Jean-Martin Archer
 // Use of this source code is governed by the MIT License found in LICENSE
 
+var bucketName = "fyle-hackathon";
+var bucketRegion = "ap-south-1";
+var IdentityPoolId = "ap-south-1:cedc3d2e-5667-42df-a43b-c9569f6bc687";
+var finalSignedURL = '';
+
+// for upload json to s3 and download from signed url 
+AWS.config.update({
+  region: bucketRegion,
+  credentials: new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: IdentityPoolId
+  })
+});
+
+var s3 = new AWS.S3({
+  apiVersion: "2006-03-01",
+  params: { Bucket: bucketName }
+});
+
+function upload_to_s3 (evidence) {
+
+  var json_str = JSON.stringify(evidence);
+  var blob = new Blob([json_str], {
+    type: "application/json"
+  });
+  var fileName = 'evidence' + (new Date()).getTime() + '.json';
+
+  var evidenceLocker = encodeURIComponent('evidence_locker') + '/';
+
+  var evidenceFileKey = evidenceLocker + fileName;
+
+  // Use S3 ManagedUpload class as it supports multipart uploads
+  var upload = new AWS.S3.ManagedUpload({
+    params: {
+      Bucket: bucketName,
+      Key: evidenceFileKey,
+      Body: blob,
+    }
+  });
+
+  var promise = upload.promise();
+
+  return promise.then(
+    function(data) {
+          var params = {
+            Bucket: bucketName,
+            Key: evidenceFileKey
+          };
+          var url = s3.getSignedUrl('getObject', params);
+          console.log('The URL is', url);
+          return url;
+        },
+        function(err) {
+          return alert("There was an error uploading your evidence. <br/> please try after sometime", err.message);
+        }
+    );
+}
+
+function download_from_s3 (signed_url) {
+  fetch(signed_url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(function(response) {
+      return response.blob();
+    })
+    .then(function(blob) {
+      b = new Blob([blob]);
+      return b.text();
+    })
+    .then( function (b){
+      console.log(b);
+      return JSON.parse(b);
+    })
+    .catch(function(err) {
+    console.log('error');
+  });
+}
+
+// for screenshot
 function captureScreen (sendResponse) {
     chrome.tabs.getSelected(null, function (tab) {
         chrome.tabs.setZoom(tab.id, 1.0);
@@ -25,42 +106,70 @@ function createEvidence (event) {
     }
 
     // url, local_storage and system_info
-    let p1 = chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         evidence.url = tabs[0].url;
         // listener in content.js
         chrome.tabs.sendMessage(tabs[0].id, {action: "getBrowserData"}, function(response) {
             evidence.local_storage = response.local_storage;
             evidence.system_info = response.browser_data;
-            return true;
+
+            // listener in background.js
+            chrome.extension.sendMessage({tabId:tabs[0].id, action: "getConsoleLog"}, function (response) {
+                console.log('getConsoleLog response', response);
+                evidence.log_data = response;
+
+                captureScreen(function (response) {
+                    console.log('captureScreen response', response);
+                    evidence.screenshot_encoded = response;
+
+                    upload_to_s3(evidence).then(function (signed_url) {
+                        finalSignedURL = signed_url;
+                        return download_from_s3(signed_url);
+                    });
+                });
+            });
         });
+
+        // captureScreen(function (response) {
+        //     console.log('captureScreen response', response);
+        //     evidence.screenshot_encoded = response;
+        // });
+
+        // upload_to_s3(evidence).then(function (signed_url) {
+        //     finalSignedURL = signed_url;
+        //     return download_from_s3(signed_url);
+        // });
     });
     
     // log_data
-    let p2 = chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-        // listener in background.js
-        chrome.extension.sendMessage({tabId:tabs[0].id, action: "getConsoleLog"}, function (response) {
-            console.log('getConsoleLog response', response);
-            evidence.log_data = response;
-            return true;
-        });
-    });
+    // let p2 = chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+    //     // listener in background.js
+    //     chrome.extension.sendMessage({tabId:tabs[0].id, action: "getConsoleLog"}, function (response) {
+    //         console.log('getConsoleLog response', response);
+    //         evidence.log_data = response;
+    //         return true;
+    //     });
+    // });
 
-    // screenshot
-    let p3 = captureScreen(function (response) {
-        console.log('captureScreen response', response);
-        evidence.screenshot_encoded = response;
-        return true;
-    });
+    // // screenshot
+    // let p3 = captureScreen(function (response) {
+    //     console.log('captureScreen response', response);
+    //     evidence.screenshot_encoded = response;
+    //     return true;
+    // });
 
-    Promise.all([p1, p2, p3]).then(values => {
-        console.log('All promises resolved!', evidence);
-        // upload_to_s3(evidence);
-    });
+    // Promise.all([p1, p2, p3]).then(values => {
+    //     console.log('All promises resolved!', evidence);
+    //     upload_to_s3(evidence).then(function (signed_url) {
+    //         finalSignedURL = signed_url;
+    //         return download_from_s3(signed_url);
+    //     });
+    // });
 }
 
 
 function downloadAndLoadEvidence (event) {
-    // evidence = download_from_s3(url);
+    evidence = download_from_s3(finalSignedURL);
     // load_evidence(evidence);
 }
 
