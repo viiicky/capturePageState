@@ -327,6 +327,16 @@ var runPopup = function () {
 
 
 (function () {
+	var LoadButton = document.getElementById('Load');
+
+	LoadButton.onclick = function (event) {
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+			chrome.tabs.sendMessage(tabs[0].id, {action: 'LoadData', evidence: evidence}, function(response) {
+				console.log(response);
+			});
+		});
+	}
+	
 	var captureButton = document.getElementById('whatToCapture');
 
 	captureButton.onclick = function (event) {
