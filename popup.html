@@ -118,6 +118,12 @@
       color: #4CAF50;
     }
 
+    input[type="file" i] {
+      margin: 10px 0;
+      font-size: 12px;
+      width: 180px;
+    }
+
   </style>
 
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
@@ -130,19 +136,22 @@
       <label for="title">Give the evidence a title<span class="mandatory">*</span></label>
       <textarea class="text-field" type="text" id="title" value="" placeholder="Enter title"></textarea>
       <button class="cta-button cursor-pointer" type="submit" id="createEvidenceAction">Collect Evidence and Create Ticket</button>
-      <div class="hide done message" id="success">
-        This issue will submitted as a ticket.
+      <div class="hide done message" id="successCollect">
+        This issue will be submitted as a ticket.
       </div>
       <div class="hide cursor-pointer message" id="copySignedURL">
-        Click to copy URL with the Evidence data
+        Click to copy Evidence URL
       </div>
     </div>
 
     <div class="popup-split">
       <h3>Debug an issue?</h3>
-      <label for="signedUrl">Paste Evidence URL<span class="mandatory">*</span></label>
-      <textarea class="text-field" type="text" id="signedUrl" value="" placeholder="Evidence URL"></textarea>
+      <label for="file">Upload JSON File</label>
+      <input type="file" id="file">
       <button class="cta-button cursor-pointer" type="submit" id="loadEvidenceAction">Load Evidence</button>
+      <div class="hide done message" id="successLoad">
+        Evidence loaded successfully.
+      </div>
     </div>
   </div>
   <script src="popup.js"></script>

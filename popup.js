@@ -135,7 +135,7 @@ function createEvidence (event) {
                         createEvidenceAction.value = 'Collect Evidence';
 
                         // show copySignedURL and success message
-                        document.getElementById('success').style.display = 'block';
+                        document.getElementById('successCollect').style.display = 'block';
                         var copySignedURL = document.getElementById('copySignedURL');
                         copySignedURL.style.display = 'block';
                         return download_from_s3(signed_url);
@@ -148,17 +148,33 @@ function createEvidence (event) {
 
 function loadEvidence (evidence) {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        console.log('loadEvidence', evidence)
         chrome.tabs.sendMessage(tabs[0].id, {action: 'LoadData', evidence: evidence}, function(response) {
             console.log(response);
+            setTimeout(function() {
+                if (response.response === 'Logged in') {
+                    document.getElementById('successLoad').style.display = 'block';
+                }
+                // clear form
+                document.getElementById('file').value = null;
+                var loadEvidenceAction = document.getElementById('loadEvidenceAction');
+                loadEvidenceAction.value = 'Load Evidence';
+            }, 2000);
         });
     });
 }
 
-function downloadAndLoadEvidence (event) {
+function loadEvidenceFromFile (event) {
     // disable button
     document.getElementById('loadEvidenceAction').className = 'cta-button disabled';
-    finalSignedURL = document.getElementById('signedUrl').value;
-    download_from_s3(finalSignedURL).then(loadEvidence);
+    var file = document.getElementById("file").files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        console.log(JSON.parse(e.target.result));
+        evidence = e.target.result;
+        loadEvidence(evidence);
+    }
+    reader.readAsText(file);
 }
 
 (function () {
@@ -171,6 +187,7 @@ function downloadAndLoadEvidence (event) {
     // mandatory title
     var title = document.getElementById('title');
     title.addEventListener('keyup', function() {
+      document.getElementById('successCollect').style.display = 'none';
       createEvidenceAction.disabled = !this.value;
       var className = !this.value ? 'cta-button disabled' : 'cta-button cursor-pointer';
       createEvidenceAction.className = className;
@@ -180,14 +197,15 @@ function downloadAndLoadEvidence (event) {
     var loadEvidenceAction = document.getElementById('loadEvidenceAction');
     loadEvidenceAction.disabled = true;
     loadEvidenceAction.className = 'cta-button disabled';
-    loadEvidenceAction.addEventListener('click', downloadAndLoadEvidence);
+    loadEvidenceAction.addEventListener('click', loadEvidenceFromFile);
 
-    // mandatory signedUrl
-    var signedUrl = document.getElementById('signedUrl');
-    signedUrl.addEventListener('keyup', function() {
-      loadEvidenceAction.disabled = !this.value;
-      var className = !this.value ? 'cta-button disabled' : 'cta-button cursor-pointer';
-      loadEvidenceAction.className = className;
+    // mandatory file
+    var file = document.getElementById('file');
+    file.addEventListener('change', function () {
+        document.getElementById('successLoad').style.display = 'none';
+        loadEvidenceAction.disabled = !this.value;
+        var className = !this.value ? 'cta-button disabled' : 'cta-button cursor-pointer';
+        loadEvidenceAction.className = className;
     });
 
     // show copySignedURL
@@ -196,7 +214,7 @@ function downloadAndLoadEvidence (event) {
         console.log('finalSignedURL', finalSignedURL);
         navigator.clipboard.writeText(finalSignedURL).then(function () {
             var copySignedURL = document.getElementById('copySignedURL');
-            copySignedURL.innerHTML = 'Copied URL with the Evidence data to the clipboard!';
+            copySignedURL.innerHTML = 'Copied Evidence URL to the clipboard!';
             copySignedURL.className = 'message done';
         });
     });

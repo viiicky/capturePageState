@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.action === "LoadData") {
-            evidence = request.evidence;
+            evidence = JSON.parse(request.evidence);
             for (key in evidence["local_storage"]) {
                 localStorage.setItem(key, evidence["local_storage"][key]);
             }
