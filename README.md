@@ -1,50 +1,55 @@
-# Capture Page State
+# fyle-inspector
 
-Get HAR logs, console logs, and screenshot to provide as much context as possible when reporting issues to developers. You can drop the HAR log file into the Network panel of any Chrome Dev Tools Window, and it will populate it.
+A chrome extension debug tool (Fyle Detective) which helps capture useful details of any bug / issue in the Web app.
 
-## Demo
-![Capture Page State Demo](assets/capturePageState.gif "Capture Page State")
-**You need to have Chrome Dev Tools open for HAR log only**.
+Features
+1. **Collect Evidence to report an issue**
+  Useful for anyone who encounters any issue on our app and want to report it.
+  Evidences include -
+  * Title (User given input)
+  * Screenshot
+  * URL
+  * Logs from the console
+  * System info
+  * Local Storage data
+  Uploads the evidence json and returns a 1day valid downloadable URL for this file.
+  [fyle-detective](https://github.com/viiicky/fyle-detective) - a sister utility tool to analyse the evidence further with the URL and raise a ticket of the issue with the evidences collected.
+
+2. **Load Evidence to debug an issue**
+  Useful for a developer to start debug the reported issue.
+  Helps to load the local storage and set the browser state to attempt a repro of the issue.
+  Works on upload of the evidence.json file.
+
+
+## Preview
+![Tool Screenshot](/tool_screenshot.png)
 
 ## Usage Instructions
 This Chrome Extension is not published to the Chrome Web Store, you need to install it in developer mode. You can find those instructions [here](#development)
 
 1. Click on Extension Icon
-2. Select what you want to capture
-   1. Screenshot
-   2. Console Logs
-   3. HAR log
-      1. **Chrome Dev Tools needs to be open to get HAR log**
-3. Click on **Get Snapshot**
-   1. The items selected will now be downloaded, 1 file per item
+2. To report an issue - Fill in title and hit `Collect Evidence`
+3. To debug an issue - Upload the evidence json file and hit `Load Evidence`
 
 ### Development
 1. Clone this repository.
-1. Open up Chrome and go to the `chrome://extensions/` page (Window → Extensions).
-1. Enable developer mode (if it's not already).
-1. Click on `Load unpacked extension`.
-1. Select the folder for this extension.
+2. Open up Chrome and go to the `chrome://extensions/` page (Window → Extensions).
+3. Enable developer mode (if it's not already).
+4. Click on `Load unpacked extension`.
+5. Select the folder for this extension.
 
 ### Specifications
 * Getting Screenshot
   * Takes screenshot of active tab using **Chrome Tabs API**
 * Getting Console Logs
-  * `popup.js` ==>`background.js` then **Chrome Debugger API** is used to get console logs for the active tab and download them using **Chrome Downloads API**
-* Getting HAR log
-  * `popup.js` ==> `background.js` ==>`devtools.js` then **Chrome DevTools API** is used to get the HAR log `chrome.devtools.network.getHAR()` and downloaded using **Chrome Downloads API**
-
-### What I Learned
-* How to use [Chrome Downloads API](https://developer.chrome.com/extensions/downloads)
-* Extending [Chrome Dev Tools](https://developer.chrome.com/extensions/devtools)
-* How to use [Chrome Debugger API](https://developer.chrome.com/extensions/debugger)
-    * [DevTools Protocol Docs](https://chromedevtools.github.io/devtools-protocol/)
-* Messaging between `popup,js`, `background.js`, and `devtools.js`
-  * https://developer.chrome.com/extensions/messaging
-* What a [HTTP Archive Format (HAR)](http://www.softwareishard.com/blog/har-12-spec/) is made of
-
-### Keyboard Shortcut
-Go to the bottom of the `chrome://extensions/` page, click on `Keyboard shortcuts` and add the shortcut of your choice.
+  * `popup.js` ==>`background.js` then **Chrome Debugger API** is used to get console logs for the active tab
+* Getting Browser Info and Local Storage
+  * `popup.js` ==> `content.js`
+* Load Evidence
+  * `popup.js` ==> `load_content.js`
 
 ### Credits
-* Icon made by Pixel perfect from www.flaticon.com
-* [thingsinjars'](https://github.com/thingsinjars) [devtools-extension](https://github.com/thingsinjars/devtools-extension) helped me understand how to extend DevTools
+* Forked from [Chrome Extension - Capture Page State](https://github.com/salhernandez/capturePageState)
+
+### Useful Reference
+* Chrome APIs - https://developer.chrome.com/apps/api_index
