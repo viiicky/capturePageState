@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Fyle Inspector",
+  "name": "Fyle Detective",
   "description": "",
   "version": "1.0",
   "author": "Break Pointers",
@@ -32,7 +32,7 @@
   ],
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "Fyle Inspector"
+    "default_title": "Fyle Detective"
   },
   "permissions": [
     "activeTab",
