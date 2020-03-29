@@ -3,7 +3,7 @@
 A chrome extension debug tool (Fyle Detective) which helps capture useful details of any bug / issue in the Web app.
 
 Features
-1. **Collect Evidence to report an issue**
+1. **Collect Evidence to report an issue**\
   Useful for anyone who encounters any issue on our app and want to report it.
   Evidences include -
   * Title (User given input)
@@ -11,13 +11,13 @@ Features
   * URL
   * Logs from the console
   * System info
-  * Local Storage data
-  Uploads the evidence json and returns a 1day valid downloadable URL for this file.
+  * Local Storage data\
+  Uploads the evidence json and returns a 1day valid downloadable URL for this file.\
   [fyle-detective](https://github.com/viiicky/fyle-detective) - a sister utility tool to analyse the evidence further with the URL and raise a ticket of the issue with the evidences collected.
 
-2. **Load Evidence to debug an issue**
-  Useful for a developer to start debug the reported issue.
-  Helps to load the local storage and set the browser state to attempt a repro of the issue.
+2. **Load Evidence to debug an issue**\
+  Useful for a developer to start debug the reported issue.\
+  Helps to load the local storage and set the browser state to attempt a repro of the issue.\
   Works on upload of the evidence.json file.
 
 
